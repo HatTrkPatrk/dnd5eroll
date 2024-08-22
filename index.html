@@ -127,14 +127,13 @@ function getRandomInt(min, max)
 
 function click_RerollDie(n, c)
 {
-    if (rollInProgress)
+    if (rollInProgress || !hasRolled(1) || !hasRolled(2) || !hasRolled(3) || !hasRolled(4) || !hasRolled(5) || !hasRolled(6))
     {
         return;
     }
 
     if (hasRerolledDie)
     {
-        alert("You've already re-roll a single die");
         return;
     }
 
@@ -170,7 +169,6 @@ function roll(n)
     {
         if (hasRerolledResult)
         {
-            alert("You've already re-rolled a full result");
             return;
         }
 
