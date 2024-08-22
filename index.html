@@ -10,6 +10,9 @@ span.spnResult { font-size: 24px; font-weight: bold; margin-left: 8px; vertical-
 
 div.divResult { display: table; width: 15%; border-collapse: collapse; margin-top: 4px; }
 div.divResult_Die { display: table-cell; width: 20%; border: 1px solid #000000; padding: 4px; text-align: center; font-size: 18px; }
+
+div.pageLeft { width: 50%; float: left; }
+div.pageRight { width: 50%; float: right; }
 </style>
 <script type="text/javascript">
 var hasRerolledResult = false;
@@ -31,6 +34,44 @@ function updateElements()
         document.getElementById('roll4').style.display = "none";
         document.getElementById('roll5').style.display = "none";
         document.getElementById('roll6').style.display = "none";
+    }
+
+    if (hasRolled(1) && hasRolled(2) && hasRolled(3) && hasRolled(4) && hasRolled(5) && hasRolled(6))
+    {
+        document.getElementById('h2Step1').style.textDecoration = "line-through";
+    }
+    else
+    {
+        document.getElementById('h2Step1').style.textDecoration = "none";
+    }
+    
+    if (hasRerolledResult)
+    {
+        document.getElementById('h3RerollResult').style.textDecoration = "line-through";
+    }
+    else
+    {
+        document.getElementById('h3RerollResult').style.textDecoration = "none";
+    }
+
+    if (hasRerolledDie)
+    {
+        document.getElementById('h3RerollDie').style.textDecoration = "line-through";
+    }
+    else
+    {
+        document.getElementById('h3RerollDie').style.textDecoration = "none";
+    }
+
+    if (hasRerolledResult && hasRerolledDie)
+    {
+        document.getElementById('h2Step2_1').style.textDecoration = "line-through";
+        document.getElementById('h2Step2_2').style.textDecoration = "line-through";
+    }
+    else
+    {
+        document.getElementById('h2Step2_1').style.textDecoration = "none";
+        document.getElementById('h2Step2_2').style.textDecoration = "none";
     }
 
     for (var i=1; i<=6; i++)
@@ -209,6 +250,7 @@ function hasRolled(n)
 <body>
 <h1>D&amp;D5e Character Ability Rolls</h1>
 
+<div class="pageLeft">
 <button onclick="roll(1);" class="btnRoll" id="roll1" style="visibility:visible">Roll #1</button>
 <span id="spnResult1" class="spnResult">&nbsp;</span><br /><br />
 <div id="divResult1" style="visibility:hidden">
@@ -280,6 +322,27 @@ function hasRolled(n)
 </div>
 </div>
 <br /><br />
+</div>
 
+
+
+<div class="pageRight">
+<ul>
+<li>
+ <h2 id="h2Step1" style="text-decoration:none">You have 6 rolls. Each roll is a 4d6. The highest 3 dice of each roll are added together to get its result.</h2>
+</li>
+<li>
+ <h2 id="h2Step2_1" style="text-decoration:none">Once you've rolled all 6 sets, you can do the following:</h2>
+ <ul>
+  <li><h3 id="h3RerollResult" style="text-decoration:none">Click a Roll button to re-roll that entire result</h3></li>
+  <li><h3 id="h3RerollDie" style="text-decoration:none">Click an individual number (die) to re-roll just that number;</h3></li>
+ </ul>
+ <h2 id="h2Step2_2" style="text-decoration:none">Each of these re-rolls can be done once, and are optional.</h2>
+</li>
+<li>
+ <h2>When you're done, you can assign the results to your character's abilities (Strength, Dexterity, Intelligence, Constitution, Wisdom, and Charisma).</h2>
+</li>
+</ul>
+</div>
 </body>
 </html>
