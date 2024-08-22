@@ -1,9 +1,285 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Bitches</title>
-  </head>
-  <body>
-    Bitches
-  </body>
+<head>
+<title>D&amp;D5e Character Ability Rolls</title>
+</head>
+<style type="text/css">
+button.btnRoll { font-size: 18px; padding-left: 32px; padding-right: 32px; vertical-align: middle;  }
+
+span.spnResult { font-size: 24px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+
+div.divResult { display: table; width: 15%; border-collapse: collapse; margin-top: 4px; }
+div.divResult_Die { display: table-cell; width: 20%; border: 1px solid #000000; padding: 4px; text-align: center; font-size: 18px; }
+</style>
+<script type="text/javascript">
+var hasRerolledResult = false;
+var hasRerolledDie = false;
+var rollInProgress = false;
+
+function updateElements()
+{
+    if (rollInProgress)
+    {
+        return;
+    }
+
+    if (!rollInProgress && hasRolled(1) && hasRolled(2) && hasRolled(3) && hasRolled(4) && hasRolled(5) && hasRolled(6) && hasRerolledResult && hasRerolledDie)
+    {
+        document.getElementById('roll1').style.display = "none";
+        document.getElementById('roll2').style.display = "none";
+        document.getElementById('roll3').style.display = "none";
+        document.getElementById('roll4').style.display = "none";
+        document.getElementById('roll5').style.display = "none";
+        document.getElementById('roll6').style.display = "none";
+    }
+
+    for (var i=1; i<=6; i++)
+    {
+        // use the largest 3 numbers for results
+        var r1 = document.getElementById("divResult"+i+"_Die1");
+        var r2 = document.getElementById("divResult"+i+"_Die2");
+        var r3 = document.getElementById("divResult"+i+"_Die3");
+        var r4 = document.getElementById("divResult"+i+"_Die4");
+
+        if (r1.innerHTML != "&nbsp;" && r2.innerHTML != "&nbsp;" && r3.innerHTML != "&nbsp;" && r4.innerHTML != "&nbsp;")
+        {
+            var highest = new Array(r1, r2, r3, r4);
+            highest.sort((a, b) => Number(b.innerHTML) - Number(a.innerHTML));
+            for (var cell of highest)
+            {
+                cell.style.fontWeight = "normal";
+                cell.style.color = "#000000";
+                cell.style.fontSize = "14px";
+            }
+
+            highest.pop();
+            var sum = 0;
+            for (var cell of highest)
+            {
+                cell.style.fontWeight = "bold";
+                cell.style.color = "#009900";
+                cell.style.fontSize = "18px";
+                sum += Number(cell.innerHTML);
+            }
+
+            document.getElementById("spnResult"+i).innerHTML = sum;
+        }
+        else
+        {
+            document.getElementById("spnResult"+i).innerHTML = "";
+        }
+    }
+}
+
+window.onload = function()
+{
+    setInterval(updateElements, 100);
+};
+
+function getRandomInt(min, max)
+{
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    // The maximum is exclusive and the minimum is inclusive
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+}
+
+function click_RerollDie(n, c)
+{
+    if (rollInProgress)
+    {
+        return;
+    }
+
+    if (hasRerolledDie)
+    {
+        alert("You've already re-roll a single die");
+        return;
+    }
+
+    if (!confirm('Are you sure you want to re-roll this die?'))
+    {
+        return;
+    }
+
+    hasRerolledDie = true;
+    document.getElementById("divResult"+n+"_Die"+c).innerHTML = "&nbsp;";
+    setTimeout(() => randomizeCell(n, c), 500);
+}
+
+function resetRowStyle(n)
+{
+    for (var i=1; i<=4; i++)
+    {
+        document.getElementById("divResult"+n+"_Die"+i).style.fontWeight = "normal";
+        document.getElementById("divResult"+n+"_Die"+i).style.color = "#000000";
+        document.getElementById("divResult"+n+"_Die"+i).style.fontSize = "14px";
+    }
+}
+
+function roll(n)
+{
+    if (rollInProgress)
+    {
+        return;
+    }
+
+    // Re-roll?
+    if (hasRolled(1) && hasRolled(2) && hasRolled(3) && hasRolled(4) && hasRolled(5) && hasRolled(6))
+    {
+        if (hasRerolledResult)
+        {
+            alert("You've already re-rolled a full result");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to re-roll Result #"+n+"?"))
+        {
+            return;
+        }
+
+        hasRerolledResult = true;
+
+        resetRowStyle(n);
+        for (var i=1; i<=4; i++)
+        {
+            document.getElementById("divResult"+n+"_Die"+i).innerHTML = "&nbsp;";
+        }
+
+        randomizeRow(n);
+        return;
+    }
+
+    if (hasRolled(n))
+    {
+        return;
+    }
+
+    resetRowStyle(n);
+
+    document.getElementById("divResult"+n).style.visibility = "visible";
+    randomizeRow(n);
+
+    if (hasRolled(1) && hasRolled(2) && hasRolled(3) && hasRolled(4) && hasRolled(5) && hasRolled(6))
+    {
+        // All results have been rolled
+        for (var i=1; i<=6; i++)
+        {
+            document.getElementById("roll"+i).innerText = "Re-Roll #"+i;
+        }
+    }
+    else
+    {
+        if (n < 6)
+        {
+            var n2 = n+1;
+            document.getElementById("roll"+n2).style.visibility = "visible";
+        }
+    }
+}
+
+function setRollInProgress(b)
+{
+    rollInProgress = b;
+}
+
+function randomizeRow(n)
+{
+    setRollInProgress(true);
+    setTimeout(() => randomizeCell(n, 1), 500);
+    setTimeout(() => randomizeCell(n, 2), 1000);
+    setTimeout(() => randomizeCell(n, 3), 1500);
+    setTimeout(() => setRollInProgress(randomizeCell(n, 4)), 2000);
+}
+
+function randomizeCell(n, c)
+{
+    document.getElementById("divResult"+n+"_Die"+c).innerHTML = getRandomInt(1, 7);
+    return false;
+}
+
+function hasRolled(n)
+{
+    return document.getElementById("divResult"+n+"_Die1").innerHTML != "&nbsp;"
+        && document.getElementById("divResult"+n+"_Die2").innerHTML != "&nbsp;"
+        && document.getElementById("divResult"+n+"_Die3").innerHTML != "&nbsp;"
+        && document.getElementById("divResult"+n+"_Die4").innerHTML != "&nbsp;";
+}
+</script>
+<body>
+<h1>D&amp;D5e Character Ability Rolls</h1>
+
+<button onclick="roll(1);" class="btnRoll" id="roll1" style="visibility:visible">Roll #1</button>
+<span id="spnResult1" class="spnResult">&nbsp;</span><br /><br />
+<div id="divResult1" style="visibility:hidden">
+<div id="divResult1" class="divResult">
+ <div id="divResult1_Die1" class="divResult_Die" onclick="click_RerollDie(1,1)">&nbsp;</div>
+ <div id="divResult1_Die2" class="divResult_Die" onclick="click_RerollDie(1,2)">&nbsp;</div>
+ <div id="divResult1_Die3" class="divResult_Die" onclick="click_RerollDie(1,3)">&nbsp;</div>
+ <div id="divResult1_Die4" class="divResult_Die" onclick="click_RerollDie(1,4)">&nbsp;</div>
+</div>
+</div>
+<br /><br />
+
+<button onclick="roll(2);" class="btnRoll" id="roll2" style="visibility:hidden">Roll #2</button>
+<span id="spnResult2" class="spnResult">&nbsp;</span><br /><br />
+<div id="divResult2" style="visibility:hidden">
+<div id="divResult2" class="divResult">
+ <div id="divResult2_Die1" class="divResult_Die" onclick="click_RerollDie(2,1)">&nbsp;</div>
+ <div id="divResult2_Die2" class="divResult_Die" onclick="click_RerollDie(2,2)">&nbsp;</div>
+ <div id="divResult2_Die3" class="divResult_Die" onclick="click_RerollDie(2,3)">&nbsp;</div>
+ <div id="divResult2_Die4" class="divResult_Die" onclick="click_RerollDie(2,4)">&nbsp;</div>
+</div>
+</div>
+<br /><br />
+
+<button onclick="roll(3);" class="btnRoll" id="roll3" style="visibility:hidden">Roll #3</button>
+<span id="spnResult3" class="spnResult">&nbsp;</span><br /><br />
+<div id="divResult3" style="visibility:hidden">
+<div id="divResult3" class="divResult">
+ <div id="divResult3_Die1" class="divResult_Die" onclick="click_RerollDie(3,1)">&nbsp;</div>
+ <div id="divResult3_Die2" class="divResult_Die" onclick="click_RerollDie(3,2)">&nbsp;</div>
+ <div id="divResult3_Die3" class="divResult_Die" onclick="click_RerollDie(3,3)">&nbsp;</div>
+ <div id="divResult3_Die4" class="divResult_Die" onclick="click_RerollDie(3,4)">&nbsp;</div>
+</div>
+</div>
+<br /><br />
+
+<button onclick="roll(4);" class="btnRoll" id="roll4" style="visibility:hidden">Roll #4</button>
+<span id="spnResult4" class="spnResult">&nbsp;</span><br /><br />
+<div id="divResult4" style="visibility:hidden">
+<div id="divResult4" class="divResult">
+ <div id="divResult4_Die1" class="divResult_Die" onclick="click_RerollDie(4,1)">&nbsp;</div>
+ <div id="divResult4_Die2" class="divResult_Die" onclick="click_RerollDie(4,2)">&nbsp;</div>
+ <div id="divResult4_Die3" class="divResult_Die" onclick="click_RerollDie(4,3)">&nbsp;</div>
+ <div id="divResult4_Die4" class="divResult_Die" onclick="click_RerollDie(4,4)">&nbsp;</div>
+</div>
+</div>
+<br /><br />
+
+<button onclick="roll(5);" class="btnRoll" id="roll5" style="visibility:hidden">Roll #5</button>
+<span id="spnResult5" class="spnResult">&nbsp;</span><br /><br />
+<div id="divResult5" style="visibility:hidden">
+<div id="divResult5" class="divResult">
+ <div id="divResult5_Die1" class="divResult_Die" onclick="click_RerollDie(5,1)">&nbsp;</div>
+ <div id="divResult5_Die2" class="divResult_Die" onclick="click_RerollDie(5,2)">&nbsp;</div>
+ <div id="divResult5_Die3" class="divResult_Die" onclick="click_RerollDie(5,3)">&nbsp;</div>
+ <div id="divResult5_Die4" class="divResult_Die" onclick="click_RerollDie(5,4)">&nbsp;</div>
+</div>
+</div>
+<br /><br />
+
+<button onclick="roll(6);" class="btnRoll" id="roll6" style="visibility:hidden">Roll #6</button>
+<span id="spnResult6" class="spnResult">&nbsp;</span><br /><br />
+<div id="divResult6" style="visibility:hidden">
+<div id="divResult6" class="divResult">
+ <div id="divResult6_Die1" class="divResult_Die" onclick="click_RerollDie(6,1)">&nbsp;</div>
+ <div id="divResult6_Die2" class="divResult_Die" onclick="click_RerollDie(6,2)">&nbsp;</div>
+ <div id="divResult6_Die3" class="divResult_Die" onclick="click_RerollDie(6,3)">&nbsp;</div>
+ <div id="divResult6_Die4" class="divResult_Die" onclick="click_RerollDie(6,4)">&nbsp;</div>
+</div>
+</div>
+<br /><br />
+
+</body>
 </html>
